@@ -13,11 +13,33 @@ let game;
  * - The <thead> should be filled w/a <tr>, and a <th> for each category
  * - The <tbody> should be filled w/ game.numCluesPerCat <tr>s,
  *   each with a question for each category in a <td>
- *   (initially, just show a "?" where the question/answer would go.)
+ *   (initially, just show a "?" where the que stion/answer would go.)
  */
 function fillTable() {
 
+  //fill categories
+  let $thead = $('<thead></thead>');
+  let $trHead = $('<tr></tr>');
+  for (let category of game.categories) {
+    const $category = $(`<th scope='col'>${category.title}</th>`);
+    $trHead.prepend($category);
+  }
+  $thead.prepend($trHead);
+  $jeopardyBoard.prepend($thead);
+  //fill clues
+  for (let i = 0; i < game.categories[0].clues.length; i++) {
+    let $row = $('<tr></tr>');
+    for (let category of game.categories) {
+      let $clue = $(`<td data-clue-number='${i}' class='${category.title} id='poo'>?</td>`);
+      $row.prepend($clue);
+      $clue.on('click', handleClueClick);
+    }
+    $jeopardyBoard.append($row);
+  }
+
+
 }
+
 
 
 /** Handle clicking on a clue: show the question or answer, update clue status.
@@ -29,6 +51,7 @@ function fillTable() {
  *
  * */
 function handleClueClick(evt) {
+  console.log(evt.target.attr('class'));
 
 }
 
@@ -39,6 +62,8 @@ function handleClueClick(evt) {
  * hides game board.
  */
 function showLoadingState() {
+  $startButton.html("Restart!");
+  $(".spinner-border").show();
 
 }
 
@@ -46,6 +71,7 @@ function showLoadingState() {
  * Shows game board, updates start button text and hides loading spinner.
  */
 function hideLoadingState() {
+  $(".spinner-border").hide();
 
 }
 
