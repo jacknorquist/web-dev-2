@@ -6,6 +6,20 @@ const $loadingSpinner = $("#LoadingSpinner");
 
 // Value of game will become the Game instance populated below
 let game;
+let randomClueArray = [0, 1, 2, 3, 4];
+
+
+
+/** getRandomClueArray: Returns randomClueArray in a randomly sorted order.*/
+function getRandomClueArray() {
+  for (let i = randomClueArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [randomClueArray[i], randomClueArray[j]] = [randomClueArray[j], randomClueArray[i]];
+  }
+  return randomClueArray;
+
+}
+
 
 
 /** Fill the HTML table #jeopardy with the categories & cells for questions.
@@ -21,24 +35,32 @@ function fillTable() {
   let $thead = $('<thead></thead>');
   let $trHead = $('<tr></tr>');
   for (let category of game.categories) {
-    const $category = $(`<th scope='col'>${category.title}</th>`);
+    const $category = $(`<th scope="col" class='text-center'>${category.title.toUpperCase()}</th>`);
     $trHead.prepend($category);
   }
   $thead.prepend($trHead);
   $jeopardyBoard.prepend($thead);
+
+
+
+
   //fill clues
-  for (let i = 0; i < game.categories[0].clues.length; i++) {
-    let $row = $('<tr></tr>');
-    for (let category of game.categories) {
-      let $clue = $(`<td data-clue-number='${i}' class='${category.title} id='poo'>?</td>`);
+
+  let clueOrder = getRandomClueArray();
+  for (let i = 0; i < game.numCluesPerCat; i++) {
+    let $row = $('<tr class="table-row"></tr>');
+    for (let j = 0; j < game.categories.length; j++) {
+      let $clue = $(`<td data-clue-number='${clueOrder[i]}' data-category-id='${j}'
+        class='bg-primary text-center'>?</td>`);
       $row.prepend($clue);
-      $clue.on('click', handleClueClick);
+
     }
     $jeopardyBoard.append($row);
   }
 
 
 }
+
 
 
 
@@ -51,7 +73,19 @@ function fillTable() {
  *
  * */
 function handleClueClick(evt) {
-  console.log(evt.target.attr('class'));
+  // let categoryInstance = game.categories.find(category => category.id ===
+  //   Number(evt.target.dataset.categoryId));
+  let categoryInstance = game.categories[evt.target.dataset.categoryId];
+
+  let clue = categoryInstance.clues[evt.target.dataset.clueNumber];
+
+  if (clue.showing === null) {
+    evt.target.innerHTML = clue.question;
+  } else {
+    evt.target.className = "bg-success text-center";
+    evt.target.innerHTML = clue.answer;
+  }
+  clue.showing = 'null' ? 'question' : 'answer';
 
 }
 
@@ -76,16 +110,19 @@ function hideLoadingState() {
 }
 
 
+
 // DO NOT CHANGE ANY CODE BELOW THIS LINE
 
 /**
  * Generates new game instance and populates game board in DOM.
  */
 async function handleStartClick() {
+  $("table").empty();
   showLoadingState();
 
   game = new Game();
   await game.populateCategoryData();
+  addClueData();
 
   fillTable();
   hideLoadingState();

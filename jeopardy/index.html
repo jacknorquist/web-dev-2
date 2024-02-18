@@ -14,16 +14,19 @@
     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 </head>
 
-<body>
+<body class="bg-danger">
   <header>
     <h1>Jeopardy!</h1>
-    <button id="StartButton">Start!</button>
+    <div>
+      <button id="StartButton">Start!</button>
+    </div>
+    <div class="spinner-border text-dark" role="status" style="display: none;">
+      <span class="visually-hidden">Loading...</span>
+    </div>
   </header>
-  <div class="spinner-border text-dark" role="status" style="display: none;">
-    <span class="visually-hidden">Loading...</span>
-  </div>
+
   <div class="container">
-    <table class="table" id="JeopardyBoard">
+    <table class="table table-bordered" id="JeopardyBoard">
     </table>
   </div>
 

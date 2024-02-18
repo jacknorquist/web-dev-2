@@ -6,6 +6,21 @@
   #74119c
 */
 
+header {
+  text-align: center;
+}
+
 body {
   background-color: #115ff4;
+  text-wrap: wrap;
+  text-align: center;
+}
+
+.table-row {
+  height: 10em;
+}
+
+td {
+  border: 2px solid black !important;
+  width: 15em;
 }

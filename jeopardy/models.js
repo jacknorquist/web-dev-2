@@ -74,7 +74,7 @@ class Game {
       const j = Math.floor(Math.random() * (i + 1));
       [CATEGORY_IDS[i], CATEGORY_IDS[j]] = [CATEGORY_IDS[j], CATEGORY_IDS[i]];
     }
-    return CATEGORY_IDS.slice(0, this.numCategories - 1);
+    return CATEGORY_IDS.slice(0, this.numCategories);
 
   }
 
@@ -89,6 +89,7 @@ class Game {
     // TODO: We've provided some structure for this function, but you'll need
     // to fill in the value for the catIds variable and the body of the loop
     // below.
+    //
     const catIds = await this.getRandomCategoryIds();
 
     for (const catId of catIds) {
@@ -97,23 +98,30 @@ class Game {
         `${BASE_API_URL}/category?id=${catId}`
       );
       let category = await response.json();
+
+
       this.categories.push(new Category(category.title, category.clues));
       // TODO: Add necessary code to fetch category data & generate
       // new instance for each catId. Populate categories array accordingly.
 
     }
 
-    //makes new instance for for each clue in the category, adds the instance
-    //to and array and sets the category clues equal to the array of clue instances
-    for (let category of this.categories) {
-      let clues = [];
-      for (let clue of category.clues) {
-        clues.push(new Clue(clue.question, clue.answer));
-      }
-      category.clues = clues;
-    }
-    console.log(this.categories);
+    //makes new instance for for each clue in the category, adds the clue instance
+    //to an array and sets the categorie's clues equal to the array of clue instances
   }
+}
+
+
+//Creates Clue instance, adds the instance to the clues array of category instance
+function addClueData() {
+  for (let category of game.categories) {
+    let clues = [];
+    for (let clue of category.clues) {
+      clues.push(new Clue(clue.question, clue.answer));
+    }
+    category.clues = clues;
+  }
+
 }
 
 /** Category class: holds category data
@@ -172,6 +180,7 @@ class Category {
       `${BASE_API_URL}/category?id=${id}`
     );
     let newCategory = await response.json();
+    console.log(await newCategory);
     let newCategoryInstance = new Category(newCategory.title, newCategory.clues);
     return (newCategoryInstance.title, newCategoryInstance.clues.slice(0, numCluesPerCat));
   }
