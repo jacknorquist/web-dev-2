@@ -6,12 +6,17 @@ const $loadingSpinner = $("#LoadingSpinner");
 
 // Value of game will become the Game instance populated below
 let game;
-let randomClueArray = [0, 1, 2, 3, 4];
+let randomClueArray = [];
 
 
 
 /** getRandomClueArray: Returns randomClueArray in a randomly sorted order.*/
 function getRandomClueArray() {
+  //Fills array up to the number of clues per category.
+  for (let i = 0; i < game.numCluesPerCat; i++) {
+    randomClueArray.push(i);
+  }
+  //Randomly sorts the array.
   for (let i = randomClueArray.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [randomClueArray[i], randomClueArray[j]] = [randomClueArray[j], randomClueArray[i]];
@@ -22,70 +27,55 @@ function getRandomClueArray() {
 
 
 
-/** Fill the HTML table #jeopardy with the categories & cells for questions.
- *
- * - The <thead> should be filled w/a <tr>, and a <th> for each category
- * - The <tbody> should be filled w/ game.numCluesPerCat <tr>s,
- *   each with a question for each category in a <td>
- *   (initially, just show a "?" where the que stion/answer would go.)
+/**fillTable: Creates and fills table with categories at the head and clues
+ * in each cell.
  */
 function fillTable() {
 
-  //fill categories
+  //Fill categories
   let $thead = $('<thead></thead>');
   let $trHead = $('<tr></tr>');
   for (let category of game.categories) {
-    const $category = $(`<th scope="col" class='text-center'>${category.title.toUpperCase()}</th>`);
+    const $category = $(`<th
+                            scope="col"
+                            class='text-center'>
+                            ${category.title.toUpperCase()}
+                            </th>`);
     $trHead.prepend($category);
   }
   $thead.prepend($trHead);
   $jeopardyBoard.prepend($thead);
 
-
-
-
-  //fill clues
-
+  //Fill clues
   let clueOrder = getRandomClueArray();
   for (let i = 0; i < game.numCluesPerCat; i++) {
     let $row = $('<tr class="table-row"></tr>');
     for (let j = 0; j < game.categories.length; j++) {
-      let $clue = $(`<td data-clue-number='${clueOrder[i]}' data-category-id='${j}'
-        class='bg-primary text-center'>?</td>`);
+      let $clue = $(`<td
+                        data-clue-number='${clueOrder[i]}'
+                        data-category-id='${j}'
+                        class='bg-primary text-center'>
+                        ?</td>`);
       $row.prepend($clue);
-
     }
     $jeopardyBoard.append($row);
   }
-
-
 }
 
 
-
-
 /** Handle clicking on a clue: show the question or answer, update clue status.
- *
- * Uses .showing property on clue to determine what to show:
- * - if currently null, show question
- * - if currently "question", show answer
- * - if currently "answer", ignore click
- *
- * */
+*/
 function handleClueClick(evt) {
-  // let categoryInstance = game.categories.find(category => category.id ===
-  //   Number(evt.target.dataset.categoryId));
   let categoryInstance = game.categories[evt.target.dataset.categoryId];
+  let clueInstance = categoryInstance.clues[evt.target.dataset.clueNumber];
 
-  let clue = categoryInstance.clues[evt.target.dataset.clueNumber];
-
-  if (clue.showing === null) {
-    evt.target.innerHTML = clue.question;
+  if (clueInstance.showing === null) {
+    evt.target.innerHTML = clueInstance.question;
   } else {
     evt.target.className = "bg-success text-center";
-    evt.target.innerHTML = clue.answer;
+    evt.target.innerHTML = clueInstance.answer;
   }
-  clue.showing = 'null' ? 'question' : 'answer';
+  clueInstance.updateShowingStatus();
 
 }
 
@@ -93,36 +83,31 @@ function handleClueClick(evt) {
 /**
  * Shows loading spinner,
  * updates Start button text to "Loading...",
- * hides game board.
+ * empties table.
  */
 function showLoadingState() {
-  $startButton.html("Restart!");
   $(".spinner-border").show();
-
+  $startButton.html("Loading...");
+  $("table").empty();
 }
 
 /**
- * Shows game board, updates start button text and hides loading spinner.
+ * Updates start button text and hides loading spinner.
  */
 function hideLoadingState() {
+  $startButton.html("Restart");
   $(".spinner-border").hide();
-
 }
 
-
-
-// DO NOT CHANGE ANY CODE BELOW THIS LINE
 
 /**
  * Generates new game instance and populates game board in DOM.
  */
 async function handleStartClick() {
-  $("table").empty();
   showLoadingState();
 
   game = new Game();
   await game.populateCategoryData();
-  addClueData();
 
   fillTable();
   hideLoadingState();
